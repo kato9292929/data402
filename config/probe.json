@@ -1,0 +1,15 @@
+{
+  "catalog": "https://raw.githubusercontent.com/kato9292929/endpoint/main/data/endpoints_full.json.gz",
+  "network": "Solana",
+  "run_interval_hours": 24,
+  "min_reobserve_hours": 20,
+  "same_host_gap_ms": 3000,
+  "max_endpoints_per_host": 4,
+  "concurrency": 4,
+  "request_timeout_ms": 15000,
+  "error_retry_wait_ms": 10000,
+  "max_retry_after_s": 60,
+  "max_run_minutes": 120,
+  "selection_seed": 20261008,
+  "user_agent": "data402-probe (+https://github.com/kato9292929/data402; reads the 402 only, never pays)"
+}
