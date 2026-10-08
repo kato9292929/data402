@@ -1,0 +1,14 @@
+{
+  "_comment": [
+    "budget (src/budget) payment rules. Values of the form env:NAME are read from the environment (see .env.example).",
+    "allowlist: the Solana payTo addresses a task may pay. An unset env entry drops out, so a missing address only makes the gate stricter.",
+    "Moved from x402-Interlock config/policy.json with the same amounts; the Base addresses and the Intercepta screening targets were not moved."
+  ],
+  "token_decimals": 6,
+  "allowlist": ["env:SELLER_SOLANA_PAY_TO"],
+  "max_amount_per_payment": "1.00",
+  "max_amount_per_run": "3.00",
+  "ask_human_above": "0.50",
+  "repurchase_window_minutes": 10,
+  "max_consecutive_failures": 3
+}

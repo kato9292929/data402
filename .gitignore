@@ -3,3 +3,7 @@ node_modules/
 next-env.d.ts
 *.tsbuildinfo
 data/.probe.lock
+var/
+.env*
+!.env.example
+keys/

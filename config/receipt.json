@@ -1,0 +1,5 @@
+{
+  "_comment": "receipt (src/receipt): code checks of what a paid purchase returned. mode record writes a delivery_review event per paid task purchase (hash, size, fields_ok; never the body). history: over the latest `window` checks of the same target, `poor_at` empty ones -> ASK_HUMAN DELIVERY_HISTORY_POOR, `mismatch_at` with fields_ok false -> ASK_HUMAN DELIVERY_HISTORY_MISMATCH. Values as in x402-Interlock config/appe-thresholds.json delivery_review.",
+  "mode": "record",
+  "history": { "window": 3, "poor_at": 2, "mismatch_at": 2 }
+}
