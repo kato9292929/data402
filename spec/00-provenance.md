@@ -72,9 +72,21 @@ The rebuild brief makes data402 the one repository, in three layers: `src/census
   commits). Their contents are unchanged, so the usage lines in their header comments still
   name the old `research/` paths.
 - `research/check-402.sh` and `research/provenance-pairs.mjs` (spec/09, dropped) stay in `research/`.
-- **`spec/08` is not here yet.** The brief asks for it to be carried over, together with its stage 4
-  conclusion that the model added only 6–8 subjective cases over the fixed rules (Interlock
-  `spec/08-stage4-review-and-validation-order.md`, sections "評価" and stage 4). Both bringing it
-  in with its history and a plain copy were refused by this session's permission settings, and
-  wait for the owner. Until then the file is in Interlock at
-  https://github.com/kato9292929/x402-Interlock/blob/35cb7ff/spec/08-stage4-review-and-validation-order.md
+- **`spec/08` is not moved; it is referenced** (owner's decision, 2026-10-08). It records a decision
+  that was stopped (the judge model added only 6–8 subjective cases over the fixed rules, so Spend
+  Guard stays `off`), about a layer data402 does not contain. The original stays the record:
+
+  | | |
+  |---|---|
+  | repository | https://github.com/kato9292929/x402-Interlock (to be archived, not deleted) |
+  | file | `spec/08-stage4-review-and-validation-order.md` |
+  | commit read | `35cb7ffb99055fba46bef685066508771612240a` (branch `claude/tender-noether-7you3c`, PR #8; the file is unchanged there since `510d93b`) |
+  | line 222 | stage 4: "モデルの上積みは6件" — added in `e38b1076b0e0817edaed25d2a505997529f8d730` (2026-10-07) |
+  | line 226 | "上積みの6件は、範囲外か・過剰かという主観の領域にある" — `e38b107` |
+  | line 254 | "モデルの上積みは8件で、範囲外・過剰・他で無料といった主観的な判断に限られた" — added in `2d42a1eb325c2be399642e75ad21bfb24ea77404` (2026-10-08) |
+  | sections | 9 (段階4の結論), 10 (固定ルールのベースラインと、継続の判断: 評価・決定・追記) |
+
+  Permalinks:
+  https://github.com/kato9292929/x402-Interlock/blob/35cb7ffb99055fba46bef685066508771612240a/spec/08-stage4-review-and-validation-order.md#L222
+  https://github.com/kato9292929/x402-Interlock/blob/35cb7ffb99055fba46bef685066508771612240a/spec/08-stage4-review-and-validation-order.md#L226
+  https://github.com/kato9292929/x402-Interlock/blob/35cb7ffb99055fba46bef685066508771612240a/spec/08-stage4-review-and-validation-order.md#L254
