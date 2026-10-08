@@ -16,6 +16,7 @@ x402-Interlock（`claude/tender-noether-7you3c`、`35cb7ff`）の `lib/` から�
 | `protect.ts`, `actions.ts`, `inbox.ts` | 送信前の照合（オーナーの登録情報、日本の住所の表記ゆれを含む）、行為ごとの方針、送信先 |
 | `world.ts` | 内容ハッシュに結び付けた World ID の承認 |
 | `ledger.ts`, `lock.ts` | ハッシュ連鎖の台帳、複数プロセスの排他 |
+| `census-link.ts` | 購入の直前に census の `/v1/hosts/{host}` を引き、`census_observation` として台帳に記録する。判定には使わない。`CENSUS_BASE_URL`（既定はゲート自身の URL）、`CENSUS_TIMEOUT_MS`（既定 3000） |
 | `policy.ts`, `amount.ts`, `signer.ts`, `http.ts`, `timeline.ts` | 金額の規則、金額の変換、署名、API の認証、画面用の整形 |
 
 ## 移さなかったもの
@@ -30,8 +31,9 @@ x402-Interlock（`claude/tender-noether-7you3c`、`35cb7ff`）の `lib/` から�
 - 台帳と状態の置き場所を `data/` から `var/budget/`（git に入れない）に変えた。`data/` は census の公開データ。
 - 受け取ったものの照合は `src/receipt/` に分けた（設定は `config/receipt.json`）。
 - `test/tasks.integration.test.ts` の「同じ購入への同時の2要求」の検査：止められた側の理由として、
-  評価の時点の `PURCHASE_IN_FLIGHT` も受け付けるようにした。Interlock ではスクリーニングの通信が
-  間に入っていたため、予約の時点で止まるのが普通だった。「売り手に払われるのは1回」の検査は変えていない。
+  評価の時点の `PURCHASE_IN_FLIGHT` と、先に払い終えた後の固定ルール `REPURCHASE_IN_WINDOW`（オーナーに
+  聞く）も受け付けるようにした。どこで止まるかは通信の順序で変わる（Interlock ではスクリーニングの
+  通信が、data402 では census の照会が間に入る）。「売り手に払われるのは1回」の検査は変えていない。
 
 ## 動かし方
 

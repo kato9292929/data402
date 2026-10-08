@@ -111,7 +111,10 @@ class FakeChain implements AllowanceChain {
 // ---------------------------------------------------------------------------
 
 let chain: FakeChain;
-let seller: Server, world: Server;
+let seller: Server, world: Server, census: Server;
+// what the census stand-in answers for /v1/hosts/{host}: "observed", "missing" (404) or "down" (500)
+let censusMode: "observed" | "missing" | "down" = "observed";
+const censusAsked: string[] = [];
 let sellerUrl = "";
 let SELLER_SOL = "";
 const paid: string[] = [];
@@ -176,6 +179,22 @@ before(async () => {
   });
   sellerUrl = await listen(seller);
 
+  census = createServer((req, res) => {
+    censusAsked.push(req.url!);
+    if (censusMode === "down") {
+      res.writeHead(500);
+      return res.end();
+    }
+    if (censusMode === "missing") {
+      res.writeHead(404, { "content-type": "application/json" });
+      return res.end(JSON.stringify({ error: "not_observed" }));
+    }
+    const host = decodeURIComponent(req.url!.split("/").pop()!);
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(JSON.stringify({ host, latest: { host, status: "alive", payTo: ["CensusPayTo1111111111111111111111111111111"], last_seen: "2026-10-08T15:00:00.000Z", last_observed_at: "2026-10-08T15:00:00.000Z", probe_version: ["data402-probe@1.0.1"] } }));
+  });
+  process.env.CENSUS_BASE_URL = await listen(census);
+
   world = createServer((req, res) => {
     let body = "";
     req.on("data", (c) => (body += c));
@@ -198,6 +217,7 @@ before(async () => {
 after(() => {
   seller.close();
   world.close();
+  census.close();
   setAllowanceChain(undefined);
   setPaymentSignerForTests(undefined);
 });
@@ -365,13 +385,15 @@ test("two requests at once for the same purchase: only one reserves and pays", a
   assert.equal([a, b].filter((v) => v.status === "PAID").length, 1);
   const loser = a.status === "PAID" ? b : a;
   const events = new Ledger().byDecision(loser.decision_id);
-  const r = events.find((e) => e.event_type === "payment_result")!;
-  const d = events.find((e) => e.event_type === "gate_decision")!;
-  // Either it saw the other one running (at evaluate, or at its own reservation), or the other had
-  // already been paid by the time it got there. Without Interlock's screening call between the two
-  // checks, the evaluate-time refusal (gate_decision PURCHASE_IN_FLIGHT) is the usual one.
-  const why = r.data.reason === "BLOCK" ? (d.data.reasons as string[]) : [String(r.data.reason)];
-  assert.ok(why.some((x) => ["PURCHASE_IN_FLIGHT", "PURCHASED_SINCE_DECISION"].includes(x)), why.join(","));
+  const r = events.find((e) => e.event_type === "payment_result");
+  const d = events.find((e) => e.event_type === "gate_decision");
+  // The loser saw the other one running (at evaluate, or at its own reservation), or the other had
+  // already been paid by the time it got there (at its reservation, or at evaluate, where the fixed
+  // repurchase rule asks the owner). Which one depends on timing: Interlock had its screening call
+  // between these checks, data402 has the census lookup.
+  const why = [...((d?.data.reasons as string[]) ?? []), String(r?.data.reason ?? "")];
+  assert.ok(why.some((x) => ["PURCHASE_IN_FLIGHT", "PURCHASED_SINCE_DECISION", "REPURCHASE_IN_WINDOW"].includes(x)), why.join(","));
+  assert.notEqual(loser.status, "PAID");
   assert.equal(paid.length, paidBefore + 1);
 });
 
@@ -629,6 +651,52 @@ test("actions on a closed task are blocked", async () => {
 
 const openFor = async (purpose: string, amount = "1.00") =>
   (await tasks()).openTask({ purpose, budget: { amount, asset: "USDC" }, expires_at: inAnHour() });
+
+// ---------------------------------------------------------------------------
+// census, just before a purchase: recorded, never decided on
+// ---------------------------------------------------------------------------
+
+const censusEvent = (decision_id: string) => new Ledger().byDecision(decision_id).find((e) => e.event_type === "census_observation")?.data;
+
+test("census: the host's latest observation is recorded before the decision; the payment goes on as usual", async () => {
+  const t = await openTask("1.00");
+  const from = censusAsked.length;
+  const v = await pay(t.task_id);
+  assert.equal(v.status, "PAID", JSON.stringify(v));
+  assert.deepEqual(censusAsked.slice(from), ["/v1/hosts/127.0.0.1"]);
+  const c = censusEvent(v.decision_id)!;
+  assert.equal(c.lookup, "observed");
+  assert.equal(c.host, "127.0.0.1");
+  assert.equal(c.task_id, t.task_id);
+  assert.deepEqual(c.payTo, ["CensusPayTo1111111111111111111111111111111"]); // census's payTo, not the seller's: only recorded
+  assert.equal(c.last_observed_at, "2026-10-08T15:00:00.000Z");
+  const order = new Ledger().byDecision(v.decision_id).map((e) => e.event_type);
+  assert.ok(order.indexOf("census_observation") < order.indexOf("gate_decision"));
+});
+
+test("census: not observed (404) or down -> recorded as such; the decision is the same", async () => {
+  for (const [mode, lookup] of [["missing", "not_observed"], ["down", "unavailable"]] as const) {
+    censusMode = mode;
+    try {
+      const t = await openTask("1.00");
+      const v = await pay(t.task_id);
+      assert.equal(v.status, "PAID", `${mode}: ${JSON.stringify(v)}`);
+      assert.deepEqual(v.reasons, ["WITHIN_POLICY"]);
+      const c = censusEvent(v.decision_id)!;
+      assert.equal(c.lookup, lookup);
+      assert.equal(c.payTo, null);
+    } finally {
+      censusMode = "observed";
+    }
+  }
+});
+
+test("census: a blocked purchase records census too, and census does not unblock it", async () => {
+  const v = await pay(undefined);
+  assert.equal(v.status, "BLOCKED");
+  assert.deepEqual(v.reasons, ["TASK_MISSING"]);
+  assert.equal(censusEvent(v.decision_id)!.lookup, "observed");
+});
 
 // ---------------------------------------------------------------------------
 // receipt (src/receipt): code checks of what came back, record only

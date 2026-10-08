@@ -19,6 +19,7 @@ import { isSolanaNetwork } from "./solana/config";
 import { allowanceChain, SolanaSendTimeout } from "./solana/allowance";
 import { checkAllowance, checkTask } from "./tasks";
 import { createApprovalRequest, loadApprovalRequest, verifyApproval, type VerificationOutcome } from "./world";
+import { censusObservation } from "./census-link";
 import type { IDKitResult } from "@worldcoin/idkit-core";
 
 const DATA = () => process.env.DATA_DIR ?? path.join(process.cwd(), "var", "budget");
@@ -227,6 +228,9 @@ export async function evaluate(input: {
     x402Version: paymentRequired.x402Version,
     accepts: paymentRequired.accepts,
   });
+
+  // census, just before the purchase: what it last observed for this host. Recorded, never decided on.
+  l.append(decision_id, "census_observation", { task_id: task_id ?? null, ...(await censusObservation(input.url, input.baseUrl)) });
 
   const now = new Date();
   const ctx = runContext(l.readAll(), run_id, input.url, now);

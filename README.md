@@ -5,10 +5,13 @@
 | 層 | 役割 | 状態 |
 |---|---|---|
 | [`census`](src/census/) | 誰に払うことになるのか。外から、支払わずに、継続して取る | 実装済み（下記） |
-| [`budget`](src/budget/) | 予算と期限の中に収める。Solana の委任で、鍵を渡さずに | まだ移していない |
-| [`receipt`](src/receipt/) | 受け取ったものを照合する。コードの検査だけ | まだ移していない |
+| [`budget`](src/budget/) | 予算と期限の中に収める。Solana の委任で、鍵を渡さずに | x402-Interlock から配置し直した。オフラインのテストが通る。devnet では移管後に動かしていない |
+| [`receipt`](src/receipt/) | 受け取ったものを照合する。コードの検査だけ | 旧 Delivery Review のコード検査を移した |
 
 判定は出さない。判断モデルは使わない。
+
+census と budget の接続は1本だけ：購入の直前に、ゲートが `GET /v1/hosts/{host}` を引き、受取先と最終観測日時を
+台帳に `census_observation` として記録する（[`src/budget/census-link.ts`](src/budget/census-link.ts)）。判定には使わない。
 
 ## census
 
@@ -108,8 +111,12 @@ cron で回す場合の例:
 | | |
 |---|---|
 | `src/census/` | プローブ・定期実行・集計（[`src/census/README.md`](src/census/README.md)） |
-| `app/` | Next.js（照会3本と一覧ページ） |
-| `config/probe.json` | プローブの設定 |
+| `src/budget/` | タスク単位の予算、支払いのゲート、承認（[`src/budget/README.md`](src/budget/README.md)） |
+| `src/receipt/` | 受け取ったものの照合（[`src/receipt/README.md`](src/receipt/README.md)） |
+| `app/` | Next.js。census の照会3本と一覧ページ、budget の API（`/api/*`）と画面（`/gate` `/tasks` `/inbox` `/approve/{id}`） |
+| `config/` | `probe.json`（census）、`policy.json`・`actions.json`（budget）、`receipt.json`（receipt） |
+| `scripts/` | `task.ts`（オーナーのタスク操作）、`why.ts`（1件の判断の経緯） |
+| `var/budget/` | budget の台帳と状態。git に入れない |
 | `data/` | 観測（`observations.jsonl`）、対象一覧（`targets.json`）、前身の観測（`payto-observations.jsonl`） |
 | `spec/` | 記録。`00` 移管、`09`・`10` 前身の調査、`11` 観測の形式 |
 | `research/` | spec/09（打ち切った調査）のスクリプト。記録として残している |

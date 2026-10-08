@@ -15,6 +15,8 @@ export type LedgerEventType =
   | "action_sent"
   | "spend_guard_review"
   | "delivery_review"
+  // census, just before a purchase (src/budget/census-link.ts): recorded, never decided on
+  | "census_observation"
   | "owner_label"
   | "owner_task_label"
   | "owner_label_reset"
