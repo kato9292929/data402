@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { allHosts, meta, targets, USDC_MINT, type HostSummary } from "@/lib/data";
+import { allHosts, meta, targets, USDC_MINT, type HostSummary } from "@/src/census/data";
 
 export const dynamic = "force-dynamic";
 

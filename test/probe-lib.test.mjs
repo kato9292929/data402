@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { dueTargets, selectTargets, toRow } from "../scripts/probe-lib.mjs";
+import { dueTargets, selectTargets, toRow } from "../src/census/probe-lib.mjs";
 
 const t = { endpoint_id: "e1", host: "a.example", url: "https://a.example/x" };
 const at = "2026-10-08T00:00:00.000Z";

@@ -2,15 +2,15 @@
 // without paying, and append one row per endpoint to data/observations.jsonl. Never rewrites a row.
 // No payment header is ever sent. Settings: config/probe.json. Format: spec/11.
 //
-// Usage: node scripts/probe.mjs [--catalog <path or URL>] [--limit N] [--min-hours H] [--dry-run] [--out file]
-// Behind an HTTP(S) proxy: NODE_USE_ENV_PROXY=1 node scripts/probe.mjs
+// Usage: node src/census/probe.mjs [--catalog <path or URL>] [--limit N] [--min-hours H] [--dry-run] [--out file]
+// Behind an HTTP(S) proxy: NODE_USE_ENV_PROXY=1 node src/census/probe.mjs
 import { appendFileSync, closeSync, existsSync, openSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { PROBE_VERSION, dueTargets, eligible, selectTargets, toRow } from "./probe-lib.mjs";
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const args = process.argv.slice(2);
 const opt = (k, d) => (args.includes(k) ? args[args.indexOf(k) + 1] : d);
 const cfg = JSON.parse(readFileSync(path.join(ROOT, "config/probe.json"), "utf8"));

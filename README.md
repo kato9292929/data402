@@ -1,5 +1,17 @@
 # data402
 
+エージェントが x402 で何かを買うとき、払う前に相手を確かめ、予算の中に収め、受け取ったものを照合する層。
+
+| 層 | 役割 | 状態 |
+|---|---|---|
+| [`census`](src/census/) | 誰に払うことになるのか。外から、支払わずに、継続して取る | 実装済み（下記） |
+| [`budget`](src/budget/) | 予算と期限の中に収める。Solana の委任で、鍵を渡さずに | まだ移していない |
+| [`receipt`](src/receipt/) | 受け取ったものを照合する。コードの検査だけ | まだ移していない |
+
+判定は出さない。判断モデルは使わない。
+
+## census
+
 Solana を受け付ける x402 の出品を、支払いをせずに定期的に叩き、402 が返るか・受取先（payTo）・
 提示金額を記録して公開する。観測した事実と観測日時だけを返し、判定は出さない。
 
@@ -10,7 +22,7 @@ Solana を受け付ける x402 の出品を、支払いをせずに定期的に�
 
 運営者は x402 のデータを扱っている（x402 出品カタログ [kato9292929/endpoint](https://github.com/kato9292929/endpoint) を運営している）。
 
-## 観測方法
+### 観測方法
 
 - 各エンドポイントに GET を送る。402 でなければ同じ URL に空の JSON で POST を1回送る。
   支払いのヘッダーは一切付けない。リダイレクトは追わない。
@@ -20,7 +32,7 @@ Solana を受け付ける x402 の出品を、支払いをせずに定期的に�
 - 同一ホストへの要求は順番に、`same_host_gap_ms` の間隔を空けて送る。429 を2回返したホストには
   その回はそれ以上送らない。
 
-## 対象の選び方
+### 対象の選び方
 
 カタログ（`kato9292929/endpoint` の `data/endpoints_full.json.gz`）のうち、USDC・1回ごとの価格・
 価格が0より大きい・カタログ生成時刻から14日以内に確認されている・`networks` に `Solana` を含む
@@ -28,7 +40,7 @@ Solana を受け付ける x402 の出品を、支払いをせずに定期的に�
 spec/11 の4節。対象はカタログに合わせて変わる。2026-10-08 の時点で 180 ホスト・501 エンドポイント
 （最初の観測を取った時点のカタログでは 177 ホスト・483 エンドポイント）。
 
-## 何を保証しないか
+### 何を保証しないか
 
 - `alive` は、観測した時刻にその URL が Solana の支払い要求を返したということだけを示す。支払えば
   データが返ること、データの中身、出品者が誰であるかは確かめていない。
@@ -40,7 +52,7 @@ spec/11 の4節。対象はカタログに合わせて変わる。2026-10-08 の
 - カタログにない出品、Solana 以外のネットワークは対象外。
 - 最初の 483 行（2026-10-08）は前身のスクリプトで取ったもので、`extra` と応答時間がない（spec/11 の5節）。
 
-## 動かし方
+### 動かし方
 
 Node.js 22.21 以上。
 
@@ -68,13 +80,13 @@ npm test
 cron で回す場合の例:
 
 ```
-17 3 * * * cd /path/to/data402 && node scripts/probe.mjs >> probe.log 2>&1
+17 3 * * * cd /path/to/data402 && node src/census/probe.mjs >> probe.log 2>&1
 ```
 
 観測を公開するには、実行後に `data/observations.jsonl` と `data/targets.json` をコミットする。
 配置先（サーバー、定期実行の場所）は決めていない。
 
-## 照会エンドポイント
+### 照会エンドポイント
 
 認証なし。すべての応答に `disclosure`（運営者が x402 のデータを扱っていること、支払いなしの 402
 読み取りであること、Solana のみであること）と `data`（行数、最新の観測日時、プローブのバージョン）が入る。
@@ -91,9 +103,11 @@ cron で回す場合の例:
 
 | | |
 |---|---|
-| `scripts/probe.mjs`, `scripts/probe-lib.mjs` | プローブ |
-| `scripts/schedule.mjs` | 定期実行 |
-| `scripts/import-legacy.mjs` | 2026-10-08 の観測を spec/11 の形式に変換した一回限りのスクリプト |
-| `lib/data.ts` | 集計（API と一覧ページが使う） |
-| `app/` | Next.js（API 3本と一覧ページ） |
-| `research/`, `spec/09-*`, `spec/10-*`, `data/payto-observations.jsonl` | x402-Interlock から移した前身の調査。記録として残している（`research/payto-summary.mjs` のためだけに devDependency の `tldts` がある） |
+| `src/census/` | プローブ・定期実行・集計（[`src/census/README.md`](src/census/README.md)） |
+| `app/` | Next.js（照会3本と一覧ページ） |
+| `config/probe.json` | プローブの設定 |
+| `data/` | 観測（`observations.jsonl`）、対象一覧（`targets.json`）、前身の観測（`payto-observations.jsonl`） |
+| `spec/` | 記録。`00` 移管、`09`・`10` 前身の調査、`11` 観測の形式 |
+| `research/` | spec/09（打ち切った調査）のスクリプト。記録として残している |
+
+`src/census/research/payto-summary.mjs` のためだけに devDependency の `tldts` がある。

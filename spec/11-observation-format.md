@@ -105,3 +105,6 @@ neither `extra` nor response times, so both are `null` in those rows; `maxTimeou
 - `data402-probe@1.0.1` (2026-10-08): on `unreachable`, `error` keeps both the error code and its
   message. 1.0.0 kept only the code, so a connection cancelled by a proxy was written as `"0"`
   (4 rows of the first 1.0.0 run, all `api.bilbop.org`). Nothing else changed.
+- File locations (2026-10-08, data rebuild brief): the probe moved from `scripts/` to `src/census/`
+  (`src/census/probe.mjs`, `probe-lib.mjs`, `schedule.mjs`, `import-legacy.mjs`). References to
+  `scripts/…` above mean those files. The probe's behaviour and version are unchanged.

@@ -7,8 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "probe": "node scripts/probe.mjs",
-    "probe:schedule": "node scripts/schedule.mjs",
+    "probe": "node src/census/probe.mjs",
+    "probe:schedule": "node src/census/schedule.mjs",
     "test": "node --test test/*.test.mjs",
     "typecheck": "tsc --noEmit"
   },

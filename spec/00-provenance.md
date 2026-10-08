@@ -61,3 +61,20 @@ c060740f2dd00aa20972bfe1b842de646ab588c7  c56f71a9b306da32a05c72b9750f68c4ef9247
   format; the ongoing record is `data/observations.jsonl` (spec/11).
 - Not moved: `research/observe-sample.mjs` (spec/09-3 sampling draw) stays in Interlock, as it was
   not on the list of files to move.
+
+## Second brief (data402 rebuild, 2026-10-08)
+
+The rebuild brief makes data402 the one repository, in three layers: `src/census/`,
+`src/budget/`, `src/receipt/`. Changes to the moved files under it:
+
+- `research/probe-catalog.mjs`, `research/payto-summary.mjs` and `research/probe-402.mjs` moved
+  to `src/census/research/` by `git mv` (`git log --follow` still reaches the Interlock
+  commits). Their contents are unchanged, so the usage lines in their header comments still
+  name the old `research/` paths.
+- `research/check-402.sh` and `research/provenance-pairs.mjs` (spec/09, dropped) stay in `research/`.
+- **`spec/08` is not here yet.** The brief asks for it to be carried over, together with its stage 4
+  conclusion that the model added only 6–8 subjective cases over the fixed rules (Interlock
+  `spec/08-stage4-review-and-validation-order.md`, sections "評価" and stage 4). Both bringing it
+  in with its history and a plain copy were refused by this session's permission settings, and
+  wait for the owner. Until then the file is in Interlock at
+  https://github.com/kato9292929/x402-Interlock/blob/35cb7ff/spec/08-stage4-review-and-validation-order.md

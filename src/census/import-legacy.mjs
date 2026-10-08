@@ -1,7 +1,7 @@
 // One-time: turn the 2026-10-08 run (data/payto-observations.jsonl, written by Interlock's
 // research/probe-catalog.mjs at 8debcd5) into spec/11 rows, so they open data/observations.jsonl.
 // That probe kept neither accepts[].extra nor response times: both are null in these rows.
-// Usage: node scripts/import-legacy.mjs > rows.jsonl
+// Usage: node src/census/import-legacy.mjs > rows.jsonl
 import { readFileSync } from "node:fs";
 
 const LEGACY = "legacy:x402-Interlock@8debcd5/research/probe-catalog.mjs";

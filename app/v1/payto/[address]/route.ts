@@ -1,5 +1,5 @@
-import { payToHosts } from "@/lib/data";
-import { respond } from "@/lib/respond";
+import { payToHosts } from "@/src/census/data";
+import { respond } from "@/src/census/respond";
 
 export const dynamic = "force-dynamic";
 
