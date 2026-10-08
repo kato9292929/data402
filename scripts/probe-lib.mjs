@@ -2,7 +2,7 @@
 // No network, no files. Format: spec/11.
 import { createHash } from "node:crypto";
 
-export const PROBE_VERSION = "data402-probe@1.0.0";
+export const PROBE_VERSION = "data402-probe@1.0.1";
 export const SOLANA_MAINNET = new Set(["solana", "solana:5eykt4usfv8p8njdtrepy1vzqkqzkvdp"]);
 const BASE58 = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 

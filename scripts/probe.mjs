@@ -47,7 +47,8 @@ async function once(url, method) {
     const body = await res.text().catch(() => "");
     return { method, http_status: res.status, header: res.headers.get("payment-required"), body, retryAfter: res.headers.get("retry-after"), response_ms: Math.round(performance.now() - t0) };
   } catch (e) {
-    const err = e?.name === "TimeoutError" ? "timeout" : String(e?.cause?.code ?? e?.cause?.message ?? e?.message ?? e).slice(0, 160);
+    const c = e?.cause;
+    const err = e?.name === "TimeoutError" ? "timeout" : (c ? [c.code, c.message].filter((x) => x !== undefined && x !== "").join(": ") : String(e?.message ?? e)).slice(0, 160);
     return { method, error: err, response_ms: Math.round(performance.now() - t0) };
   }
 }

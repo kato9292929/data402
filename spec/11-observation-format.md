@@ -99,3 +99,9 @@ kept as `data/payto-observations.jsonl`), converted by `scripts/import-legacy.mj
 neither `extra` nor response times, so both are `null` in those rows; `maxTimeoutSeconds` is
 `null` too. Its failure classes map as: no response → `unreachable`; other HTTP status →
 `no_402`; 402 without a Solana entry → `no_solana`; 402 with one → `alive`.
+
+## 6. Changes
+
+- `data402-probe@1.0.1` (2026-10-08): on `unreachable`, `error` keeps both the error code and its
+  message. 1.0.0 kept only the code, so a connection cancelled by a proxy was written as `"0"`
+  (4 rows of the first 1.0.0 run, all `api.bilbop.org`). Nothing else changed.
