@@ -15,7 +15,7 @@ host answered" would be wrong.
 | `endpoint_id` | the catalog's id (`kato9292929/endpoint`) |
 | `host` | hostname, lower case, without a leading `www.` (the catalog's `hostOf`) |
 | `url` | the URL requested |
-| `status` | `alive` / `no_402` / `unreachable` / `no_solana` (section 2) |
+| `status` | `alive` / `no_challenge` / `no_solana` / `unavailable` / `no_402` / `unreachable` (section 2; `no_challenge` and `unavailable` from 1.1.0) |
 | `http_status` | the HTTP status of the recorded response; `null` when there was none |
 | `payTo` | `payTo` of the first Solana mainnet entry of `accepts`, if it is a base58 string of 32–44 characters; else `null` |
 | `amount` | that entry's `amount` (v2) or `maxAmountRequired` (v1), as a string, in the asset's smallest unit, as the 402 gave it |
@@ -31,7 +31,7 @@ Fields added beyond the brief, all copied from the request or the response:
 | field | why |
 |---|---|
 | `method` | `GET` or `POST`: which request the row records (section 3) |
-| `error` | on `unreachable`: the error the request ended with (`timeout`, `ENOTFOUND`, …); on `no_solana`: `402_not_parsed` when the 402 carried no readable `accepts` |
+| `error` | on `unreachable`: the error the request ended with (`timeout`, `ENOTFOUND`, …). Before 1.1.0 also on `no_solana`: `402_not_parsed` when the 402 carried no readable `accepts` (that case is `no_challenge` from 1.1.0; no row in the data has it) |
 | `x402_version` | `x402Version` from the 402, when `alive` |
 | `accepts` | every Solana mainnet entry of `accepts` (scheme, network, amount, asset, payTo, maxTimeoutSeconds, extra), when `alive`. The flat fields above come from the first one; a 402 can offer more than one (e.g. `exact` and `batch`), and these are not dropped |
 
@@ -40,16 +40,37 @@ case-insensitive. Devnet and testnet entries are not Solana mainnet.
 
 ## 2. `status`
 
-The brief says the statuses are "5つ" and lists four. The four listed are used, and no other is added.
+The brief says the statuses are "5つ" and lists four. Those four were used alone up to
+`data402-probe@1.0.1`. Two were added in 1.1.0 (2026-10-09), for the reasons below.
 
-| status | condition |
-|---|---|
-| `alive` | HTTP 402, and `accepts` has at least one Solana mainnet entry |
-| `no_solana` | HTTP 402, and no Solana mainnet entry could be read (only other networks, or no readable `accepts`) |
-| `no_402` | an HTTP response other than 402 (redirects are not followed, so 3xx is recorded as such) |
-| `unreachable` | no HTTP response: timeout, DNS, TLS, connection refused or reset, or a proxy on our side refusing the connection (the `error` text keeps what was said) |
+| status | condition | since |
+|---|---|---|
+| `alive` | HTTP 402, and `accepts` has at least one Solana mainnet entry | 1.0.0 |
+| `no_challenge` | HTTP 402, and neither the `PAYMENT-REQUIRED` header nor the body carries a readable, non-empty `accepts` (empty body, `{}`, HTML, an undecodable header, `accepts: []`) | 1.1.0 |
+| `no_solana` | HTTP 402 with a readable, non-empty `accepts`, none of it on Solana mainnet (other networks only) | 1.0.0 (narrowed in 1.1.0) |
+| `unavailable` | HTTP 429 or 5xx, as the response stands after the retry of section 3 | 1.1.0 |
+| `no_402` | any other HTTP response (redirects are not followed, so 3xx is recorded as such) | 1.0.0 (narrowed in 1.1.0) |
+| `unreachable` | no HTTP response: timeout, DNS, TLS, connection refused or reset, or a proxy on our side refusing the connection (the `error` text keeps what was said) | 1.0.0 |
 
 `alive` says only that the endpoint answered with a Solana payment requirement at that time.
+
+**Why `no_challenge`.** On 2026-10-08 five endpoints of onchain-stock-data answered 402 with an
+empty body all day. The seller's facilitator had run out of credit during settlement, and
+`@x402/core` builds its settlement-failure answer as a 402 with an empty body. The buyer had not
+paid and was not the cause (onchain-stock-data PR #63). Under the four statuses such a row is
+`no_solana`, which reads as "sold on other networks": the opposite of what happened. A 402 that
+says nothing about how to pay is now recorded as such.
+
+**Why `unavailable`.** The fix in PR #63 answers 503 with `Retry-After` instead. Under the four
+statuses that is `no_402`, the same as a 404. That form is spreading, so "not selling right now"
+(`unavailable`) is kept apart from "not an x402 listing" (`no_402`).
+
+**Rows written before 1.1.0 keep their status** (section 1: rows are never changed). In them a
+429/5xx is `no_402` with that `http_status`, and a 402 without readable `accepts` would be
+`no_solana` with `error: 402_not_parsed`. In the data as of 2026-10-09 (984 rows): 33 such
+`no_402` rows (502, 503, 530; 14 from the legacy run, 19 from 1.0.0) and no `402_not_parsed`
+row. A reader who wants the 1.1.0 classes for old rows can derive them from `http_status` and
+`error`; the stored status is what the probe of that time wrote.
 
 ## 3. Request
 
@@ -108,3 +129,8 @@ neither `extra` nor response times, so both are `null` in those rows; `maxTimeou
 - File locations (2026-10-08, data rebuild brief): the probe moved from `scripts/` to `src/census/`
   (`src/census/probe.mjs`, `probe-lib.mjs`, `schedule.mjs`, `import-legacy.mjs`). References to
   `scripts/…` above mean those files. The probe's behaviour and version are unchanged.
+- `data402-probe@1.1.0` (2026-10-09): two statuses added, `no_challenge` and `unavailable`
+  (section 2, with the 2026-10-08 event that made the four statuses misleading). `no_solana` now
+  needs a readable, non-empty `accepts`; `no_402` no longer covers 429 and 5xx. Rows already
+  written keep their status. Changed: `src/census/probe-lib.mjs` (`toRow`), `src/census/data.ts`
+  (`Status`), `test/probe-lib.test.mjs`. The request, the retry and the selection are unchanged.

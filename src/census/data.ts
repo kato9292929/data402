@@ -3,7 +3,8 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
-export type Status = "alive" | "no_402" | "unreachable" | "no_solana";
+// no_challenge and unavailable from data402-probe@1.1.0 (spec/11 section 2); earlier rows never have them
+export type Status = "alive" | "no_402" | "unreachable" | "no_solana" | "no_challenge" | "unavailable";
 
 export type Observation = {
   observed_at: string;

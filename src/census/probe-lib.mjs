@@ -2,7 +2,7 @@
 // No network, no files. Format: spec/11.
 import { createHash } from "node:crypto";
 
-export const PROBE_VERSION = "data402-probe@1.0.1";
+export const PROBE_VERSION = "data402-probe@1.1.0";
 export const SOLANA_MAINNET = new Set(["solana", "solana:5eykt4usfv8p8njdtrepy1vzqkqzkvdp"]);
 const BASE58 = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
@@ -115,10 +115,16 @@ export function toRow(target, res, observedAt) {
   };
   if (res.error) return { ...base, status: "unreachable", error: res.error };
   base.http_status = res.http_status;
+  // 429 and 5xx, after the retry of spec/11 section 3: not selling right now, which is not the
+  // same as "not an x402 listing" (no_402).
+  if (res.http_status === 429 || res.http_status >= 500) return { ...base, status: "unavailable" };
   if (res.http_status !== 402) return { ...base, status: "no_402" };
   const pr = paymentRequirements(res.header, res.body);
+  // A 402 that says nothing about how to pay (no readable accepts, or an empty one), e.g. the
+  // settlement-failure 402 with an empty body seen on 2026-10-08: not "sold on other networks".
+  if (!pr || !pr.accepts.length) return { ...base, status: "no_challenge" };
   const sol = solanaAccepts(pr);
-  if (!sol.length) return { ...base, status: "no_solana", ...(pr ? {} : { error: "402_not_parsed" }) };
+  if (!sol.length) return { ...base, status: "no_solana" };
   const a = sol[0];
   return {
     ...base,

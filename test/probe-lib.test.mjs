@@ -40,11 +40,35 @@ test("other statuses", () => {
   assert.equal(toRow(t, { http_status: 404, body: "" }, at).status, "no_402");
   const base = toRow(t, { http_status: 402, header: b64({ accepts: [{ network: "eip155:8453", payTo: "0x1", amount: "1" }] }), body: "" }, at);
   assert.equal(base.status, "no_solana");
-  const junk = toRow(t, { http_status: 402, header: null, body: "<html>" }, at);
-  assert.equal(junk.status, "no_solana");
-  assert.equal(junk.error, "402_not_parsed");
   const devnet = toRow(t, { http_status: 402, header: b64({ accepts: [{ network: "solana-devnet", payTo: PAY, amount: "1" }] }), body: "" }, at);
   assert.equal(devnet.status, "no_solana");
+});
+
+test("no_challenge: a 402 with nothing to pay in header or body is not no_solana", () => {
+  // 2026-10-08: a seller's facilitator ran out of credit mid-settlement and @x402/core answered 402 with an empty body
+  const empty = toRow(t, { http_status: 402, header: null, body: "" }, at);
+  assert.equal(empty.status, "no_challenge");
+  assert.equal(empty.http_status, 402);
+  assert.equal(empty.payTo, null);
+  assert.equal(empty.error, undefined);
+  assert.equal(toRow(t, { http_status: 402, header: null, body: "{}" }, at).status, "no_challenge");
+  assert.equal(toRow(t, { http_status: 402, header: null, body: "<html>Payment Required</html>" }, at).status, "no_challenge");
+  assert.equal(toRow(t, { http_status: 402, header: "not base64 json", body: "" }, at).status, "no_challenge");
+  assert.equal(toRow(t, { http_status: 402, header: b64({ x402Version: 2, accepts: [] }), body: "" }, at).status, "no_challenge");
+  assert.equal(toRow(t, { http_status: 402, header: null, body: JSON.stringify({ x402Version: 1, accepts: [] }) }, at).status, "no_challenge");
+});
+
+test("unavailable: 429 and 5xx (after the retry) are kept apart from no_402", () => {
+  for (const code of [429, 500, 502, 503, 504]) {
+    const r = toRow(t, { method: "GET", http_status: code, header: null, body: "" }, at);
+    assert.equal(r.status, "unavailable", String(code));
+    assert.equal(r.http_status, code);
+  }
+  for (const code of [200, 301, 401, 403, 404, 410]) assert.equal(toRow(t, { http_status: code, header: null, body: "" }, at).status, "no_402", String(code));
+});
+
+test("rows carry the probe version that classified them", () => {
+  assert.equal(toRow(t, { http_status: 503, body: "" }, at).probe_version, "data402-probe@1.1.0");
 });
 
 test("selection keeps observed endpoints, then fills by hash; at most max per host", () => {
