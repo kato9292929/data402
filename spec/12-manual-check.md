@@ -102,3 +102,13 @@ node src/census/manual-check.mjs draw  <endpoint checkout>          # 記入用�
 node src/census/manual-check.mjs merge <endpoint checkout>          # 記入済みの記入用 + 1節の記録 → 照合用（gap_hours を計算）
 node src/census/manual-check.mjs tally                              # 照合用の match を数える
 ```
+
+## 9. 抽出の結果（2026-10-09、規則のコミット `9bc8672` の後に実行）
+
+- 層の大きさ（母集団 180 ホスト）：B 39、H 5、M 0、L 136。
+- B（39）≤ 40 なので、09-3 のとおり B を全件、残り 1 を H・M・L に等分（各 0）、端数 1 を L に入れた。
+  抽出は **B 39 + L 1 = 40 ホスト、40 エンドポイント**。照合する行はすべて `data402-probe@1.0.0`（GET 31、POST 9）。
+- この配分は 09-3 の規則をそのまま当てた結果で、抽出の後に規則は変えていない。B 以外の層がほとんど入らないので、
+  この確認で分かるのは、ほぼブランドを名乗る（または自社の）ホストの行についてである。別の配分で確かめたいなら、
+  新しい規則を先にコミットしてから抽出し直す（オーナーが決める）。
+- 記入用：`data/manual-check-20261009-blank.csv`。照合用は記入の後に `merge` で作る。
