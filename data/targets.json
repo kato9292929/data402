@@ -1,7 +1,7 @@
 {
- "written_at": "2026-10-08T14:54:12.361Z",
- "probe_version": "data402-probe@1.0.0",
- "catalog_source": "https://raw.githubusercontent.com/kato9292929/endpoint/main/data/endpoints_full.json.gz",
+ "written_at": "2026-10-09T16:30:27.594Z",
+ "probe_version": "data402-probe@1.1.0",
+ "catalog_source": "/home/user/kato9292929/endpoint/data/endpoints_full.json.gz",
  "catalog_generated_at": "2026-10-08T13:30:54.578Z",
  "rule": "USDC, per-call, price > 0, last_seen within 14 days of catalog generated_at, networks includes Solana (spec/10 revision 2, 2ae1a94); up to max_endpoints_per_host per host (spec/11)",
  "network": "Solana",
