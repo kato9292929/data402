@@ -17,8 +17,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const SETS = {
   // spec/12 section 1 (superseded by 20261009b, spec/12 section 10)
   20261009: { snapshot: "0414c41a174131861719bc4f61a4acf4da4dac25", upper: "2026-10-08T15:07:38.717Z" },
-  // spec/12 section 10: the snapshot after the data402-probe@1.1.0 run (filled in when it is committed)
-  "20261009b": { snapshot: process.env.MANUAL_CHECK_SNAPSHOT_B ?? "", upper: process.env.MANUAL_CHECK_UPPER_B ?? "" },
+  // spec/12 section 10: the snapshot after the data402-probe@1.1.0 run
+  "20261009b": { snapshot: "176457101c92994bd509e48519bf694dfa3eff46", upper: "2026-10-09T16:44:03.484Z" },
 };
 const CATALOG_COMMIT = "432b3bf02947ef832d97041b188594d7ddee2657";
 const SEED = 20261008;
