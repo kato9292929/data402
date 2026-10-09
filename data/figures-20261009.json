@@ -1,0 +1,78 @@
+{
+  "snapshot": "176457101c92994bd509e48519bf694dfa3eff46",
+  "observed_at_upper_bound": "2026-10-09T16:44:03.484Z",
+  "catalog": {
+    "commit": "432b3bf02947ef832d97041b188594d7ddee2657",
+    "generated_at": "2026-10-08T13:30:54.578Z"
+  },
+  "unit_note": "Hosts are a full count of the targets; endpoints are not: at most 4 per host.",
+  "target_hosts": 180,
+  "target_endpoints": 501,
+  "eligible_endpoints_in_catalog": 6016,
+  "endpoints_without_a_row": 0,
+  "latest_rows_used": 501,
+  "latest_rows_probe_versions": [
+    "data402-probe@1.1.0"
+  ],
+  "hosts_with_payTo_read": 149,
+  "distinct_payTo": 92,
+  "W": {
+    "value": 1.62,
+    "hosts": 149,
+    "payTo": 92,
+    "rule": "spec/10 c856aae"
+  },
+  "platform_candidates": {
+    "payTo": 1,
+    "hosts": 9,
+    "rule": "spec/10 c56f71a, N=5"
+  },
+  "W_prime": {
+    "value": 1.54,
+    "hosts": 140,
+    "payTo": 91,
+    "rule": "spec/10 c56f71a"
+  },
+  "hosts_paid_to_largest_payTo": 23,
+  "host_status": {
+    "alive": 149,
+    "unavailable": 6,
+    "unreachable": 2,
+    "no_402": 22,
+    "no_solana": 1
+  },
+  "endpoint_status": {
+    "alive": 419,
+    "unavailable": 19,
+    "unreachable": 10,
+    "no_402": 49,
+    "no_solana": 4
+  },
+  "observation_rows": 1485,
+  "rows_with_feePayer": 792,
+  "payto_summary_output": [
+    "denominator (eligible hosts)               180",
+    "probed hosts                               180",
+    "payTo readable (X)                         149  coverage 82.8%  line 50%: OVER",
+    "  with a Base payTo                        0",
+    "  with a Solana payTo                      149",
+    "not readable, by reason                    {\"unavailable\":6,\"unreachable\":2,\"no_402\":22,\"no_solana\":1}",
+    "W hosts / distinct payTo (line 1.5)        1.62  OVER  (149 hosts, 92 payTo)",
+    "  per network                              {\"base\":{\"hosts\":0,\"payTo\":0,\"W\":null},\"solana\":{\"hosts\":149,\"payTo\":92,\"W\":1.62},\"other\":{\"hosts\":0,\"payTo\":0,\"W\":null}}",
+    "  hosts paid to the largest payTo          23",
+    "  share of hosts paid to the top 10 payTo  43.6%",
+    "  hosts naming CoinGecko / Exa             {\"CoinGecko\":{\"named_hosts\":4,\"readable\":4,\"distinct_payTo\":3},\"Exa\":{\"named_hosts\":3,\"readable\":3,\"distinct_payTo\":3}}",
+    "W_d registrable domains / payTo (no line)  1.12  (103 domains)",
+    "platform candidates (N=5 unrelated domains) 1 payTo, 9 hosts set apart",
+    "W' without them (line 1.5)               1.54  OVER  (140 hosts, 91 payTo); W_d' 1.07",
+    "  for reference only, N=3 / N=10           [{\"N\":3,\"candidates\":3,\"W\":1.49,\"W_d\":1.01},{\"N\":10,\"candidates\":0,\"W\":1.62,\"W_d\":1.12}]",
+    "hosts naming a brand not their own          35 (readable 28)",
+    "  payTo matches the brand's own host       0",
+    "  payTo differs from the brand's own host  3",
+    "  cannot be matched                        32",
+    "brands with an own x402 host               Birdeye, CoinGecko, Exa, QuickNode (own payTo read: Exa)",
+    "same host, several endpoints               one payTo 112, several 0",
+    "payTo seen at 2+ hosts                     12 addresses over 69 hosts",
+    "hosts marked own (spec/10 section 4)       0"
+  ]
+}
