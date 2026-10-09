@@ -1,0 +1,40 @@
+catalog 2026-10-08T13:30:54.578Z: 6016 eligible endpoints; targets 501 endpoints on 180 hosts; due 501
+[retry] GET https://token-intel-x402.meisburply.deno.net/api/token-intel: HTTP 503 (Retry-After none); wait 30 s
+[retry] GET https://vps-62-120.cloudhosting.lv:8443/skill-drops: ECONNRESET: read ECONNRESET; retry after 10000 ms
+52/501 rows (last host x402-hash-api.vercel.app)
+[retry] POST https://token-intel-x402.meisburply.deno.net/api/token-intel: HTTP 503 (Retry-After none); wait 30 s
+[retry] GET https://vps-62-120.cloudhosting.lv:8443/order/market-research: ECONNRESET: read ECONNRESET; retry after 10000 ms
+[retry] GET https://vps-62-120.cloudhosting.lv:8443/order/repo-security-review: ECONNRESET: read ECONNRESET; retry after 10000 ms
+[retry] GET https://vps-62-120.cloudhosting.lv:8443/arena-live: ECONNRESET: read ECONNRESET; retry after 10000 ms
+150/501 rows (last host x402-doctor.onrender.com)
+153/501 rows (last host api.sitecheck-api.workers.dev)
+[retry] GET https://resolve402.dev/api/hiring-signals: UND_ERR_CONNECT_TIMEOUT: Connect Timeout Error (attempted address: resolve402.dev:443, timeout: 10000ms); retry after 10000 ms
+202/501 rows (last host newruntime.com)
+[retry] GET https://api.bilbop.org/v1/sol-mint-info: 0: Request was cancelled.; retry after 10000 ms
+252/501 rows (last host openai.mm.family)
+[retry] GET https://api.bilbop.org/v1/tts: 0: Request was cancelled.; retry after 10000 ms
+[retry] GET https://api.bilbop.org/v1/summarize: 0: Request was cancelled.; retry after 10000 ms
+[retry] GET https://api.bilbop.org/brand-feedback: 0: Request was cancelled.; retry after 10000 ms
+301/501 rows (last host api.bilbop.org)
+[retry] GET https://x402.conclavedao.fun/signal: HTTP 503 (Retry-After none); wait 30 s
+350/501 rows (last host qty.vercel.app)
+[retry] POST https://x402.conclavedao.fun/signal: HTTP 503 (Retry-After none); wait 30 s
+[retry] GET https://x402.conclavedao.fun/round: HTTP 503 (Retry-After none); wait 30 s
+[retry] GET https://true402.dev/api/v1/bsc/token-report: ECONNRESET: read ECONNRESET; retry after 10000 ms
+400/501 rows (last host motion.penguindriver.com)
+[retry] GET https://gpt55.558686.xyz/v1/paid/wallet-signing-safety-pack: HTTP 503 (Retry-After 60); wait 60 s
+[retry] POST https://x402.conclavedao.fun/round: HTTP 503 (Retry-After none); wait 30 s
+[retry] GET https://agentresolver.vercel.app/api/usdc-payment-check: UND_ERR_HEADERS_OVERFLOW: Headers Overflow Error; retry after 10000 ms
+[retry] GET https://agentresolver.vercel.app/api/api-trust-security-preflight: UND_ERR_HEADERS_OVERFLOW: Headers Overflow Error; retry after 10000 ms
+452/501 rows (last host health.penguindriver.com)
+[retry] POST https://gpt55.558686.xyz/v1/paid/wallet-signing-safety-pack: HTTP 503 (Retry-After 60); wait 60 s
+[retry] GET https://gpt55.558686.xyz/v1/paid/call-packs/gpt-5.6-sol-100: HTTP 503 (Retry-After 60); wait 60 s
+[retry] POST https://gpt55.558686.xyz/v1/paid/call-packs/gpt-5.6-sol-100: HTTP 503 (Retry-After 60); wait 60 s
+[retry] GET https://gpt55.558686.xyz/v1/chat/completions/gpt-5.6: HTTP 503 (Retry-After 60); wait 60 s
+[retry] POST https://gpt55.558686.xyz/v1/chat/completions/gpt-5.6: HTTP 503 (Retry-After 60); wait 60 s
+[retry] GET https://gpt55.558686.xyz/v1/chat/completions: HTTP 503 (Retry-After 60); wait 60 s
+[retry] POST https://gpt55.558686.xyz/v1/chat/completions: HTTP 503 (Retry-After 60); wait 60 s
+501/501 rows (last host gpt55.558686.xyz)
+wrote 501 rows to data/observations.jsonl: {"alive":419,"unavailable":19,"no_402":49,"unreachable":10,"no_solana":4}
+exit 0
+2026-10-09T16:46:08Z
