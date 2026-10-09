@@ -57,11 +57,14 @@ async function once(url, method) {
 async function request(url, method, state) {
   let r = await once(url, method);
   if (r.error) {
+    console.log(`[retry] ${method} ${url}: ${r.error}; retry after ${cfg.error_retry_wait_ms} ms`);
     await sleep(cfg.error_retry_wait_ms);
     r = await once(url, method);
   } else if (r.http_status === 429 || r.http_status === 503) {
     if (r.http_status === 429) state.n429++;
-    await sleep(Math.min(cfg.max_retry_after_s, Number(r.retryAfter) || 30) * 1000);
+    const waitS = Math.min(cfg.max_retry_after_s, Number(r.retryAfter) || 30);
+    console.log(`[retry] ${method} ${url}: HTTP ${r.http_status} (Retry-After ${r.retryAfter ?? "none"}); wait ${waitS} s`);
+    await sleep(waitS * 1000);
     r = await once(url, method);
     if (r.http_status === 429) state.n429++;
   }
@@ -159,8 +162,14 @@ async function worker() {
     const state = { n429: 0 };
     for (const [i, t] of ts.entries()) {
       if (i > 0) await sleep(cfg.same_host_gap_ms);
-      if (state.n429 >= 2) break; // a host that answered 429 twice gets no more requests this run
-      if (Date.now() > deadline) break;
+      if (state.n429 >= 2) {
+        console.log(`[stop-host] ${host}: answered 429 twice; ${ts.length - i} endpoints left for the next run`);
+        break; // a host that answered 429 twice gets no more requests this run
+      }
+      if (Date.now() > deadline) {
+        console.log(`[deadline] ${host}: max_run_minutes reached; ${ts.length - i} endpoints left for the next run`);
+        break;
+      }
       const row = await observe(t, state);
       appendFileSync(OUT, JSON.stringify(row) + "\n");
       counts[row.status] = (counts[row.status] ?? 0) + 1;

@@ -59,7 +59,8 @@ empty body all day. The seller's facilitator had run out of credit during settle
 `@x402/core` builds its settlement-failure answer as a 402 with an empty body. The buyer had not
 paid and was not the cause (onchain-stock-data PR #63). Under the four statuses such a row is
 `no_solana`, which reads as "sold on other networks": the opposite of what happened. A 402 that
-says nothing about how to pay is now recorded as such.
+says nothing about how to pay is now recorded as such. This event happened outside census's
+targets, and no row in the data shows it (section 6).
 
 **Why `unavailable`.** The fix in PR #63 answers 503 with `Retry-After` instead. Under the four
 statuses that is `no_402`, the same as a 404. That form is spreading, so "not selling right now"
@@ -134,3 +135,16 @@ neither `extra` nor response times, so both are `null` in those rows; `maxTimeou
   needs a readable, non-empty `accepts`; `no_402` no longer covers 429 and 5xx. Rows already
   written keep their status. Changed: `src/census/probe-lib.mjs` (`toRow`), `src/census/data.ts`
   (`Status`), `test/probe-lib.test.mjs`. The request, the retry and the selection are unchanged.
+- Basis of the 1.1.0 statuses, checked 2026-10-09: the event of section 2 (onchain-stock-data,
+  `osd.x402jp.com`, 402 with an empty body on 2026-10-08) **happened outside census's targets.**
+  The catalog (`endpoint@432b3bf`, the one `targets.json` was drawn from, and the latest one,
+  generated 2026-10-09T13:19:43Z) has one record for that host, `https://osd.x402jp.com`
+  (Solana and Base, 0.01 USDC per call), with `last_seen` 2026-05-30: 131.6 days before the
+  catalog was generated, so it fails the 14-day condition of spec/10 revision 2 and is not in
+  `targets.json`. The five endpoints that answered 402 with an empty body have no record of their
+  own in the catalog. **When the statuses were added, the data had 0 rows of this kind** (no row
+  for `osd.x402jp.com` in `observations.jsonl` or `payto-observations.jsonl`, and no 402 without a
+  readable `accepts` anywhere). The statuses were added because the same answers (an empty-body
+  402 from `@x402/core`'s settlement failure, and 503 + `Retry-After` from the PR #63 fix) can
+  occur on hosts inside the targets, not because census observed them. `x402jp.com` is the
+  operator's own domain.

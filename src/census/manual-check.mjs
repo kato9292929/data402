@@ -3,9 +3,10 @@
 // stratification and random stream of x402-Interlock research/observe-sample.mjs. Inputs are read
 // from the pinned commits (spec/12 section 1), never from the working files.
 //
-//   node src/census/manual-check.mjs draw  <endpoint checkout>   -> data/manual-check-20261009-blank.csv
-//   node src/census/manual-check.mjs merge <endpoint checkout>   -> data/manual-check-20261009.csv
-//   node src/census/manual-check.mjs tally
+//   node src/census/manual-check.mjs draw  <set> <endpoint checkout>   -> data/manual-check-<set>-blank.csv
+//   node src/census/manual-check.mjs merge <set> <endpoint checkout>   -> data/manual-check-<set>.csv
+//   node src/census/manual-check.mjs tally <set>
+// <set> is one of SETS below (spec/12 sections 1 and 10).
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
@@ -13,14 +14,21 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const SNAPSHOT = "0414c41a174131861719bc4f61a4acf4da4dac25";
-const UPPER = "2026-10-08T15:07:38.717Z";
+const SETS = {
+  // spec/12 section 1 (superseded by 20261009b, spec/12 section 10)
+  20261009: { snapshot: "0414c41a174131861719bc4f61a4acf4da4dac25", upper: "2026-10-08T15:07:38.717Z" },
+  // spec/12 section 10: the snapshot after the data402-probe@1.1.0 run (filled in when it is committed)
+  "20261009b": { snapshot: process.env.MANUAL_CHECK_SNAPSHOT_B ?? "", upper: process.env.MANUAL_CHECK_UPPER_B ?? "" },
+};
 const CATALOG_COMMIT = "432b3bf02947ef832d97041b188594d7ddee2657";
 const SEED = 20261008;
 const TOTAL = 40;
-const DATE = "20261009";
-const BLANK = path.join(ROOT, `data/manual-check-${DATE}-blank.csv`);
-const FULL = path.join(ROOT, `data/manual-check-${DATE}.csv`);
+const [cmd, SET, checkout] = process.argv.slice(2);
+if (cmd && !SETS[SET]) throw new Error(`set must be one of ${Object.keys(SETS).join(", ")}`);
+const { snapshot: SNAPSHOT, upper: UPPER } = SETS[SET] ?? {};
+if (cmd && (!SNAPSHOT || !UPPER)) throw new Error(`set ${SET} has no snapshot yet`);
+const BLANK = path.join(ROOT, `data/manual-check-${SET}-blank.csv`);
+const FULL = path.join(ROOT, `data/manual-check-${SET}.csv`);
 const STATUSES = ["alive", "no_challenge", "no_solana", "unavailable", "no_402", "unreachable"];
 const BLANK_COLS = ["host", "endpoint_id", "url", "method", "observed_at", "probe_version", "seen_status", "seen_payTo", "seen_amount", "checked_at", "checker"];
 const FULL_COLS = ["host", "endpoint_id", "url", "method", "observed_at", "recorded_status", "recorded_http_status", "recorded_payTo", "recorded_amount", "recorded_asset", "recorded_error", "probe_version", "seen_status", "seen_payTo", "seen_amount", "match", "note", "checked_at", "gap_hours", "checker", "stratum"];
@@ -187,7 +195,6 @@ const rowOf = (x) => ({
   stratum: x.stratum,
 });
 
-const [cmd, checkout] = process.argv.slice(2);
 if (cmd === "draw") {
   if (existsSync(BLANK) && !process.argv.includes("--force")) throw new Error(`${path.relative(ROOT, BLANK)} exists; it may already be filled in`);
   const d = await draw(path.resolve(checkout));
@@ -232,5 +239,5 @@ if (cmd === "draw") {
   console.log(JSON.stringify({ rows: rows.length, ...counts, gap_hours: gaps.length ? { min: gaps[0], max: gaps.at(-1) } : null }));
   console.log("A mismatch cannot be told apart as a probe error or a change after the observation; read it with gap_hours (spec/12 section 6). Only the drawn endpoints were checked.");
 } else {
-  console.log("usage: node src/census/manual-check.mjs draw|merge <endpoint checkout> | tally");
+  console.log("usage: node src/census/manual-check.mjs draw|merge <set> <endpoint checkout> | tally <set>");
 }
